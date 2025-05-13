@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -27,58 +27,59 @@ import ClientSessions from './pages/client/Sessions';
 import ClientTasks from './pages/client/Tasks';
 
 function App() {
-  return (
-    <Router>
-      <ThemeProvider>
-        <AuthProvider>
-          <Routes>
-            {/* Auth Routes */}
-            <Route element={<AuthLayout />}>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-            </Route>
-            
-            {/* Coach Routes */}
-            <Route 
-              path="/coach" 
-              element={
-                <ProtectedRoute requiredRole="coach">
-                  <DashboardLayout userRole="coach" />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<CoachDashboard />} />
-              <Route path="clients" element={<ClientManagement />} />
-              <Route path="clients/:id" element={<ClientDetail />} />
-              <Route path="canvas" element={<CoachingCanvas />} />
-              <Route path="agent" element={<AgentConfiguration />} />
-              <Route path="messages" element={<CoachMessages />} />
-              <Route path="sessions" element={<CoachingSessions />} />
-            </Route>
-            
-            {/* Client Routes */}
-            <Route 
-              path="/client" 
-              element={
-                <ProtectedRoute requiredRole="client">
-                  <DashboardLayout userRole="client" />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<ClientDashboard />} />
-              <Route path="messages" element={<ClientMessages />} />
-              <Route path="sessions" element={<ClientSessions />} />
-              <Route path="tasks" element={<ClientTasks />} />
-            </Route>
-            
-            {/* Redirect root to login */}
-            <Route path="*" element={<Login />} />
-          </Routes>
-        </AuthProvider>
-      </ThemeProvider>
-    </Router>
-  );
+    return (
+        <Router>
+            <ThemeProvider>
+                <AuthProvider>
+                    <Routes>
+                        {/* Auth Routes */}
+                        <Route element={<AuthLayout />}>
+                            <Route path='/login' element={<Login />} />
+                            <Route path='/register' element={<Register />} />
+                            <Route path='/forgot-password' element={<ForgotPassword />} />
+                        </Route>
+
+                        {/* Coach Routes */}
+                        <Route
+                            path='/coach'
+                            element={
+                                <ProtectedRoute requiredRole='coach'>
+                                    <DashboardLayout userRole='coach' />
+                                </ProtectedRoute>
+                            }
+                        >
+                            <Route index element={<CoachDashboard />} />
+                            <Route path='clients' element={<ClientManagement />} />
+                            <Route path='clients/:id' element={<ClientDetail />} />
+                            <Route path='canvas' element={<CoachingCanvas />} />
+                            <Route path='agent' element={<AgentConfiguration />} />
+                            <Route path='messages' element={<CoachMessages />} />
+                            <Route path='sessions' element={<CoachingSessions />} />
+                        </Route>
+
+                        {/* Client Routes */}
+                        <Route
+                            path='/client'
+                            element={
+                                <ProtectedRoute requiredRole='client'>
+                                    <DashboardLayout userRole='client' />
+                                </ProtectedRoute>
+                            }
+                        >
+                            <Route index element={<ClientDashboard />} />
+                            <Route path='messages' element={<ClientMessages />} />
+                            <Route path='sessions' element={<ClientSessions />} />
+                            <Route path='tasks' element={<ClientTasks />} />
+                        </Route>
+
+                        {/* Redirect root to login */}
+                        <Route path='/' element={<Navigate to='/login' />} />
+                        <Route path='*' element={<Navigate to='/login' />} />
+                    </Routes>
+                </AuthProvider>
+            </ThemeProvider>
+        </Router>
+    );
 }
 
 export default App;
