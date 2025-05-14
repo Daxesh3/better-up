@@ -3,78 +3,56 @@ import { MessageSquare, Search, Phone, Video, Image, Paperclip, Send, MoreVertic
 import { Card } from '../../components/shared/Card';
 import Button from '../../components/shared/Button';
 
+interface Message {
+    id: number;
+    sender: 'client' | 'coach';
+    message: string;
+    time: string;
+}
+
+interface Client {
+    id: string;
+    name: string;
+    image: string;
+    lastMessage: string;
+    time: string;
+    unread: number;
+    online: boolean;
+    messages: Message[];
+}
+
 const CoachMessages: React.FC = () => {
     const [selectedClient, setSelectedClient] = useState<string | null>('1');
+    const [newMessage, setNewMessage] = useState('');
 
-    // Mock data
-    const clients = [
-        {
-            id: '1',
-            name: 'Emma Thompson',
-            image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150',
-            lastMessage: 'Thank you for the session today!',
-            time: '10:30 AM',
-            unread: 2,
-            online: true,
-        },
-        {
-            id: '2',
-            name: 'Robert Chen',
-            image: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150',
-            lastMessage: 'Looking forward to our next meeting',
-            time: 'Yesterday',
-            unread: 0,
-            online: false,
-        },
-        {
-            id: '3',
-            name: 'Sarah Wilson',
-            image: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150',
-            lastMessage: 'The workshop was really helpful',
-            time: 'Yesterday',
-            unread: 0,
-            online: true,
-        },
-    ];
+    const handleSendMessage = () => {
+        if (!newMessage.trim() || !selectedClient) return;
 
-    const messages = [
-        {
-            id: 1,
-            sender: 'client',
-            message: 'Hi Sarah, I wanted to follow up on our last session.',
-            time: '10:00 AM',
-        },
-        {
-            id: 2,
+        const client = clients.find((c) => c.id === selectedClient);
+        if (!client) return;
+
+        const newMsg: Message = {
+            id: client.messages.length + 1,
             sender: 'coach',
-            message: 'Of course! How are you progressing with the action items we discussed?',
-            time: '10:05 AM',
-        },
-        {
-            id: 3,
-            sender: 'client',
-            message: `I've completed the leadership assessment and started implementing the communication framework we talked about.`,
-            time: '10:15 AM',
-        },
-        {
-            id: 4,
-            sender: 'coach',
-            message: `That's excellent progress! Have you noticed any immediate impacts in your team interactions?`,
-            time: '10:20 AM',
-        },
-        {
-            id: 5,
-            sender: 'client',
-            message: `Yes, actually! The team seems more engaged during our meetings, and I'm getting better at delegating tasks.`,
-            time: '10:25 AM',
-        },
-        {
-            id: 6,
-            sender: 'client',
-            message: 'Thank you for the session today!',
-            time: '10:30 AM',
-        },
-    ];
+            message: newMessage,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+
+        // Update the client's messages
+        client.messages.push(newMsg);
+        client.lastMessage = newMessage;
+        client.time = 'Just now';
+        client.unread = 0;
+
+        setNewMessage('');
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+        }
+    };
 
     return (
         <div className='h-[calc(100vh-theme(spacing.20))] flex'>
@@ -158,26 +136,28 @@ const CoachMessages: React.FC = () => {
                             </div>
 
                             <div className='flex-1 overflow-y-auto p-4 space-y-4'>
-                                {messages.map((message) => (
-                                    <div key={message.id} className={`flex ${message.sender === 'coach' ? 'justify-end' : 'justify-start'}`}>
-                                        <div
-                                            className={`max-w-[70%] ${
-                                                message.sender === 'coach'
-                                                    ? 'bg-indigo-600 text-white'
-                                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-                                            } rounded-lg px-4 py-2`}
-                                        >
-                                            <p className='text-sm'>{message.message}</p>
-                                            <p
-                                                className={`text-xs mt-1 ${
-                                                    message.sender === 'coach' ? 'text-indigo-200' : 'text-gray-500 dark:text-gray-400'
-                                                }`}
+                                {clients
+                                    .find((c) => c.id === selectedClient)
+                                    ?.messages.map((message) => (
+                                        <div key={message.id} className={`flex ${message.sender === 'coach' ? 'justify-end' : 'justify-start'}`}>
+                                            <div
+                                                className={`max-w-[70%] ${
+                                                    message.sender === 'coach'
+                                                        ? 'bg-indigo-600 text-white'
+                                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                                                } rounded-lg px-4 py-2`}
                                             >
-                                                {message.time}
-                                            </p>
+                                                <p className='text-sm'>{message.message}</p>
+                                                <p
+                                                    className={`text-xs mt-1 ${
+                                                        message.sender === 'coach' ? 'text-indigo-200' : 'text-gray-500 dark:text-gray-400'
+                                                    }`}
+                                                >
+                                                    {message.time}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
                             </div>
 
                             <div className='p-4 border-t border-gray-200 dark:border-gray-700'>
@@ -186,10 +166,13 @@ const CoachMessages: React.FC = () => {
                                     <Button variant='outline' size='sm' icon={<Paperclip size={16} />} />
                                     <input
                                         type='text'
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        onKeyPress={handleKeyPress}
                                         placeholder='Type a message...'
                                         className='flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500'
                                     />
-                                    <Button variant='primary' size='sm' icon={<Send size={16} />} />
+                                    <Button variant='primary' size='sm' icon={<Send size={16} />} onClick={handleSendMessage} />
                                 </div>
                             </div>
                         </>
@@ -206,5 +189,114 @@ const CoachMessages: React.FC = () => {
         </div>
     );
 };
+
+// Mock data with separate messages for each client
+const clients: Client[] = [
+    {
+        id: '1',
+        name: 'Emma Thompson',
+        image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150',
+        lastMessage: 'Thank you for the session today!',
+        time: '10:30 AM',
+        unread: 2,
+        online: true,
+        messages: [
+            {
+                id: 1,
+                sender: 'client',
+                message: 'Hi Sarah, I wanted to follow up on our last session.',
+                time: '10:00 AM',
+            },
+            {
+                id: 2,
+                sender: 'coach',
+                message: 'Of course! How are you progressing with the action items we discussed?',
+                time: '10:05 AM',
+            },
+            {
+                id: 3,
+                sender: 'client',
+                message: `I've completed the leadership assessment and started implementing the communication framework we talked about.`,
+                time: '10:15 AM',
+            },
+            {
+                id: 4,
+                sender: 'coach',
+                message: `That's excellent progress! Have you noticed any immediate impacts in your team interactions?`,
+                time: '10:20 AM',
+            },
+            {
+                id: 5,
+                sender: 'client',
+                message: `Yes, actually! The team seems more engaged during our meetings, and I'm getting better at delegating tasks.`,
+                time: '10:25 AM',
+            },
+            {
+                id: 6,
+                sender: 'client',
+                message: 'Thank you for the session today!',
+                time: '10:30 AM',
+            },
+        ],
+    },
+    {
+        id: '2',
+        name: 'Robert Chen',
+        image: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150',
+        lastMessage: 'Looking forward to our next meeting',
+        time: 'Yesterday',
+        unread: 0,
+        online: false,
+        messages: [
+            {
+                id: 1,
+                sender: 'client',
+                message: 'Hi, I have some questions about the strategic planning framework.',
+                time: 'Yesterday',
+            },
+            {
+                id: 2,
+                sender: 'coach',
+                message: 'Sure, what would you like to know?',
+                time: 'Yesterday',
+            },
+            {
+                id: 3,
+                sender: 'client',
+                message: 'Looking forward to our next meeting',
+                time: 'Yesterday',
+            },
+        ],
+    },
+    {
+        id: '3',
+        name: 'Sarah Wilson',
+        image: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150',
+        lastMessage: 'The workshop was really helpful',
+        time: 'Yesterday',
+        unread: 0,
+        online: true,
+        messages: [
+            {
+                id: 1,
+                sender: 'client',
+                message: 'I attended the workshop yesterday',
+                time: 'Yesterday',
+            },
+            {
+                id: 2,
+                sender: 'coach',
+                message: 'Great! How did you find it?',
+                time: 'Yesterday',
+            },
+            {
+                id: 3,
+                sender: 'client',
+                message: 'The workshop was really helpful',
+                time: 'Yesterday',
+            },
+        ],
+    },
+];
 
 export default CoachMessages;
