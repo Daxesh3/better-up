@@ -58,7 +58,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ userRole }) => {
                     <div className='flex items-center'>
                         <button
                             onClick={toggleSidebar}
-                            className='p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 focus:outline-none'
+                            className='md:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 focus:outline-none'
                         >
                             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
                         </button>
