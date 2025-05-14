@@ -71,7 +71,7 @@ const Button: React.FC<ButtonProps> = ({
                 </span>
             )}
 
-            {!isLoading && icon && <span className='mr-2'>{icon}</span>}
+            {!isLoading && icon && <span className={`${children ? 'mr-2' : ''}`}>{icon}</span>}
 
             {children}
         </button>
