@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { Users, MessageSquare, Calendar, PanelLeft, Lightbulb, LogOut, Moon, Sun, Menu, X, CheckSquare, Brain, UserCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -12,7 +12,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ userRole }) => {
     const { user, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const navigate = useNavigate();
+    const location = useLocation();
 
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen);
@@ -131,9 +131,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ userRole }) => {
                         </div>
                     </div>
                 </aside>
-
+                {/* {location.pathname === '/coach/messages' && ()} */}
                 {/* Main content */}
-                <main className='flex-1 overflow-y-auto p-4 md:p-6 pt-20 md:pt-6'>
+                <main className={`flex-1 overflow-y-auto ${location.pathname === '/coach/messages' ? '' : 'p-4 md:p-6 pt-20 md:pt-6'}`}>
                     {/* Backdrop for mobile sidebar */}
                     {sidebarOpen && <div className='fixed inset-0 bg-black/50 z-10 md:hidden' onClick={closeSidebar} />}
                     <Outlet />
