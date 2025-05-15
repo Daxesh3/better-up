@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, MessageSquare, Calendar, TrendingUp, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 
 import { Card, CardContent, CardHeader } from '../../components/shared/Card';
 import Button from '../../components/shared/Button';
 import { useAuth } from '../../contexts/AuthContext';
+import Skeleton from '../../components/shared/Skeleton';
 
 const CoachDashboard: React.FC = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(true);
 
     const getAlertClass = (severity: string) => {
         switch (severity) {
@@ -22,6 +24,18 @@ const CoachDashboard: React.FC = () => {
                 return 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800';
         }
     };
+
+    useEffect(() => {
+        // Simulate loading data from server
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 2000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (isLoading) {
+        return <DashboardSkeleton />;
+    }
 
     return (
         <div className='space-y-6'>
@@ -216,4 +230,57 @@ const clientAlerts = [
     { id: 3, client: 'Sarah Wilson', alert: 'Session reminder sent', severity: 'info', icon: <Clock size={16} className='text-blue-500' /> },
 ];
 
+const DashboardSkeleton = () => (
+    <div className='space-y-6'>
+        {/* Stats Section */}
+        <Skeleton type='text' width='20%' />
+        <Skeleton type='text' width='30%' />
+
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
+            {[1, 2, 3, 4].map((i) => (
+                <Card key={i} className='px-6 py-8'>
+                    <div className='space-y-3'>
+                        <Skeleton type='text' width='40%' />
+                        <Skeleton type='text' width='60%' />
+                    </div>
+                </Card>
+            ))}
+        </div>
+        {/* Recent Sessions */}
+        <Card className='p-6'>
+            <div className='space-y-4'>
+                <Skeleton type='text' width='30%' />
+                <div className='space-y-3'>
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className='flex items-center space-x-4'>
+                            <Skeleton type='avatar' />
+                            <div className='flex-1 space-y-2'>
+                                <Skeleton type='text' width='75%' />
+                                <Skeleton type='text' width='50%' />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </Card>
+
+        {/* Upcoming Sessions */}
+        <Card className='p-6'>
+            <div className='space-y-4'>
+                <Skeleton type='text' width='30%' />
+                <div className='space-y-3'>
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className='flex items-center space-x-4'>
+                            <Skeleton type='avatar' />
+                            <div className='flex-1 space-y-2'>
+                                <Skeleton type='text' width='75%' />
+                                <Skeleton type='text' width='50%' />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </Card>
+    </div>
+);
 export default CoachDashboard;

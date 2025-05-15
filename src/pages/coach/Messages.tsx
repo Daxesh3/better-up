@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageSquare, Search, Phone, Video, Image, Paperclip, Send, MoreVertical } from 'lucide-react';
-import { Card } from '../../components/shared/Card';
 import Button from '../../components/shared/Button';
+import Skeleton from '../../components/shared/Skeleton';
 
 interface Message {
     id: number;
@@ -24,6 +24,15 @@ interface Client {
 const CoachMessages: React.FC = () => {
     const [selectedClient, setSelectedClient] = useState<string | null>('1');
     const [newMessage, setNewMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        // Simulate loading data from server
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 1200);
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleSendMessage = () => {
         if (!newMessage.trim() || !selectedClient) return;
@@ -72,38 +81,42 @@ const CoachMessages: React.FC = () => {
                     </div>
 
                     <div className='flex-1 overflow-y-auto'>
-                        {clients.map((client) => (
-                            <div
-                                key={client.id}
-                                className={`p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 ${
-                                    selectedClient === client.id ? 'bg-gray-50 dark:bg-gray-750' : ''
-                                }`}
-                                onClick={() => setSelectedClient(client.id)}
-                            >
-                                <div className='flex items-center space-x-3'>
-                                    <div className='relative'>
-                                        <img src={client.image} alt={client.name} className='h-12 w-12 rounded-full object-cover' />
-                                        {client.online && (
-                                            <div className='absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-400 border-2 border-white dark:border-gray-800' />
+                        {isLoading ? (
+                            <ClientListSkeleton />
+                        ) : (
+                            clients.map((client) => (
+                                <div
+                                    key={client.id}
+                                    className={`p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 ${
+                                        selectedClient === client.id ? 'bg-gray-50 dark:bg-gray-750' : ''
+                                    }`}
+                                    onClick={() => setSelectedClient(client.id)}
+                                >
+                                    <div className='flex items-center space-x-3'>
+                                        <div className='relative'>
+                                            <img src={client.image} alt={client.name} className='h-12 w-12 rounded-full object-cover' />
+                                            {client.online && (
+                                                <div className='absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-400 border-2 border-white dark:border-gray-800' />
+                                            )}
+                                        </div>
+                                        <div className='flex-1 min-w-0'>
+                                            <div className='flex items-center justify-between'>
+                                                <h3 className='text-sm font-medium text-gray-900 dark:text-gray-100 truncate'>{client.name}</h3>
+                                                <span className='text-xs text-gray-500 dark:text-gray-400'>{client.time}</span>
+                                            </div>
+                                            <p className='text-sm text-gray-500 dark:text-gray-400 truncate'>{client.lastMessage}</p>
+                                        </div>
+                                        {client.unread > 0 && (
+                                            <div className='flex-shrink-0'>
+                                                <span className='inline-flex items-center justify-center h-5 w-5 rounded-full bg-indigo-600 text-xs font-medium text-white'>
+                                                    {client.unread}
+                                                </span>
+                                            </div>
                                         )}
                                     </div>
-                                    <div className='flex-1 min-w-0'>
-                                        <div className='flex items-center justify-between'>
-                                            <h3 className='text-sm font-medium text-gray-900 dark:text-gray-100 truncate'>{client.name}</h3>
-                                            <span className='text-xs text-gray-500 dark:text-gray-400'>{client.time}</span>
-                                        </div>
-                                        <p className='text-sm text-gray-500 dark:text-gray-400 truncate'>{client.lastMessage}</p>
-                                    </div>
-                                    {client.unread > 0 && (
-                                        <div className='flex-shrink-0'>
-                                            <span className='inline-flex items-center justify-center h-5 w-5 rounded-full bg-indigo-600 text-xs font-medium text-white'>
-                                                {client.unread}
-                                            </span>
-                                        </div>
-                                    )}
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
                 </div>
 
@@ -135,31 +148,38 @@ const CoachMessages: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className='flex-1 overflow-y-auto p-4 space-y-4'>
-                                {clients
-                                    .find((c) => c.id === selectedClient)
-                                    ?.messages.map((message) => {
-                                        const isCoach = message.sender === 'coach';
-                                        return (
-                                            <div key={message.id} className={`flex ${isCoach ? 'justify-end' : 'justify-start'}`}>
-                                                <div
-                                                    className={`max-w-[70%] relative ${
-                                                        isCoach
-                                                            ? 'bg-indigo-600 text-white rounded-br-none'
-                                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-none'
-                                                    } rounded-lg px-4 py-2`}
-                                                >
-                                                    <p className='text-sm'>{message.message}</p>
-                                                    <p className={`text-xs mt-1 ${isCoach ? 'text-indigo-200' : 'text-gray-500 dark:text-gray-400'}`}>
-                                                        {message.time}
-                                                    </p>
-                                                    {/* <div
-                                                        className={`absolute -bottom-[4px] right-0 w-0 h-0 border-t-[5px] border-t-indigo-600 border-l-[15px] border-l-transparent`}
-                                                    /> */}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                            <div className='flex-1 overflow-y-auto'>
+                                {isLoading ? (
+                                    <MessageThreadSkeleton />
+                                ) : (
+                                    <div className='p-4 space-y-4'>
+                                        {clients
+                                            .find((c) => c.id === selectedClient)
+                                            ?.messages.map((message) => {
+                                                const isCoach = message.sender === 'coach';
+                                                return (
+                                                    <div key={message.id} className={`flex ${isCoach ? 'justify-end' : 'justify-start'}`}>
+                                                        <div
+                                                            className={`max-w-[70%] relative ${
+                                                                isCoach
+                                                                    ? 'bg-indigo-600 text-white rounded-br-none'
+                                                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-none'
+                                                            } rounded-lg px-4 py-2`}
+                                                        >
+                                                            <p className='text-sm'>{message.message}</p>
+                                                            <p
+                                                                className={`text-xs mt-1 ${
+                                                                    isCoach ? 'text-indigo-200' : 'text-gray-500 dark:text-gray-400'
+                                                                }`}
+                                                            >
+                                                                {message.time}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
+                                )}
                             </div>
 
                             <div className='p-4 border-t border-gray-200 dark:border-gray-700'>
@@ -300,5 +320,32 @@ const clients: Client[] = [
         ],
     },
 ];
+
+const ClientListSkeleton = () => (
+    <div className='space-y-4 p-4'>
+        {[1, 2, 3].map((i) => (
+            <div key={i} className='flex items-center space-x-3'>
+                <Skeleton type='avatar' />
+                <div className='flex-1 space-y-2'>
+                    <Skeleton type='text' width='75%' />
+                    <Skeleton type='text' width='50%' />
+                </div>
+            </div>
+        ))}
+    </div>
+);
+
+const MessageThreadSkeleton = () => (
+    <div className='space-y-4 p-4'>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+                <div className={`w-[70%] ${i % 2 === 0 ? 'bg-gray-200 dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-800'} rounded-lg p-4`}>
+                    <Skeleton type='text' width='48' className='mb-2' />
+                    <Skeleton type='text' width='24' />
+                </div>
+            </div>
+        ))}
+    </div>
+);
 
 export default CoachMessages;

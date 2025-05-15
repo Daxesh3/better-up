@@ -1,18 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Search, Plus, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../../components/shared/Card';
 import Button from '../../components/shared/Button';
+import Skeleton from '../../components/shared/Skeleton';
 
 const ClientManagement: React.FC = () => {
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        // Simulate loading data from server
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleViewDetails = (id: string) => {
         navigate(`/coach/clients/${id}`);
     };
 
+    if (isLoading) {
+        return <ClientManagementSkeleton />;
+    }
+
     return (
-        <div className='space-y-6'>
+        <div className={`space-y-6 transition-all duration-500`}>
             <div className='flex items-center justify-between'>
                 <div>
                     <h1 className='text-2xl font-bold text-gray-900 dark:text-gray-100'>Client Management</h1>
@@ -23,7 +38,7 @@ const ClientManagement: React.FC = () => {
                 </Button>
             </div>
 
-            <Card>
+            <Card className='transition-all duration-500'>
                 <CardHeader title='Client Overview' subtitle='View and manage all your clients' icon={<Users size={18} />} />
                 <CardContent>
                     <div className='flex flex-col md:flex-row gap-4 mb-6'>
@@ -46,29 +61,19 @@ const ClientManagement: React.FC = () => {
                         <table className='min-w-full divide-y divide-gray-200 dark:divide-gray-700'>
                             <thead>
                                 <tr>
-                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'>
-                                        Client
-                                    </th>
-                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'>
-                                        Company
-                                    </th>
-                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'>
-                                        Status
-                                    </th>
-                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'>
-                                        Progress
-                                    </th>
-                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'>
-                                        Next Session
-                                    </th>
-                                    <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'>
-                                        Actions
-                                    </th>
+                                    {['Client', 'Company', 'Status', 'Progress', 'Next Session', 'Actions'].map((header, index) => (
+                                        <th
+                                            key={index}
+                                            className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'
+                                        >
+                                            {header}
+                                        </th>
+                                    ))}
                                 </tr>
                             </thead>
                             <tbody className='divide-y divide-gray-200 dark:divide-gray-700'>
                                 {clients.map((client) => (
-                                    <tr key={client.id} className='hover:bg-gray-50 dark:hover:bg-gray-750'>
+                                    <tr key={client.id} className='hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200'>
                                         <td className='px-6 py-4 whitespace-nowrap'>
                                             <div className='flex items-center'>
                                                 <div className='h-10 w-10 flex-shrink-0'>
@@ -97,7 +102,10 @@ const ClientManagement: React.FC = () => {
                                         <td className='px-6 py-4 whitespace-nowrap'>
                                             <div className='flex items-center'>
                                                 <div className='w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full'>
-                                                    <div className='h-2 bg-indigo-600 rounded-full' style={{ width: `${client.progress}%` }} />
+                                                    <div
+                                                        className='h-2 bg-indigo-600 rounded-full transition-all duration-500 ease-out'
+                                                        style={{ width: `${client.progress}%` }}
+                                                    />
                                                 </div>
                                                 <span className='ml-2 text-sm text-gray-600 dark:text-gray-400'>{client.progress}%</span>
                                             </div>
@@ -191,5 +199,88 @@ export const clients = [
         ],
     },
 ];
+
+const ClientManagementSkeleton = () => (
+    <div className='space-y-6'>
+        {/* Header Section */}
+        <div className='flex items-center justify-between'>
+            <div className='space-y-2'>
+                <Skeleton type='text' width='200px' />
+                <Skeleton type='text' width='300px' />
+            </div>
+            <Skeleton type='button' width='150px' />
+        </div>
+
+        <Card>
+            <CardHeader title='Client Overview' subtitle='View and manage all your clients' icon={<Users size={18} />} />
+            <CardContent>
+                {/* Search and Filter Section */}
+                <div className='flex flex-col md:flex-row gap-4 mb-6'>
+                    <div className='flex-1 relative'>
+                        <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                            <Search size={18} className='text-gray-400' />
+                        </div>
+                        <Skeleton type='text' width='100%' height='40px' className='pl-10' />
+                    </div>
+                    <Skeleton type='button' width='100px' />
+                </div>
+
+                {/* Table Skeleton */}
+                <div className='overflow-x-auto'>
+                    <table className='min-w-full divide-y divide-gray-200 dark:divide-gray-700'>
+                        <thead>
+                            <tr>
+                                {['Client', 'Company', 'Status', 'Progress', 'Next Session', 'Actions'].map((header, index) => (
+                                    <th key={index} className='px-6 py-3 text-left'>
+                                        <Skeleton type='text' width='100px' />
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody className='divide-y divide-gray-200 dark:divide-gray-700'>
+                            {[1, 2, 3].map((i) => (
+                                <tr key={i}>
+                                    {/* Client Column */}
+                                    <td className='px-6 py-4 whitespace-nowrap'>
+                                        <div className='flex items-center space-x-3'>
+                                            <Skeleton type='avatar' />
+                                            <div className='space-y-2'>
+                                                <Skeleton type='text' width='120px' />
+                                                <Skeleton type='text' width='80px' />
+                                            </div>
+                                        </div>
+                                    </td>
+                                    {/* Company Column */}
+                                    <td className='px-6 py-4 whitespace-nowrap'>
+                                        <Skeleton type='text' width='100px' />
+                                    </td>
+                                    {/* Status Column */}
+                                    <td className='px-6 py-4 whitespace-nowrap'>
+                                        <Skeleton type='text' width='60px' />
+                                    </td>
+                                    {/* Progress Column */}
+                                    <td className='px-6 py-4 whitespace-nowrap'>
+                                        <div className='flex items-center space-x-2'>
+                                            <Skeleton type='text' width='100px' />
+                                            <Skeleton type='text' width='40px' />
+                                        </div>
+                                    </td>
+                                    {/* Next Session Column */}
+                                    <td className='px-6 py-4 whitespace-nowrap'>
+                                        <Skeleton type='text' width='100px' />
+                                    </td>
+                                    {/* Actions Column */}
+                                    <td className='px-6 py-4 whitespace-nowrap'>
+                                        <Skeleton type='button' width='100px' />
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+);
 
 export default ClientManagement;
